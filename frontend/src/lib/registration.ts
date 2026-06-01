@@ -62,7 +62,7 @@ export function buildRegistrationOptions(platformMeta: any, language?: Language)
     options.push({
       key: 'phone',
       label,
-      description: '通过 Hero-SMS 接码注册，无需邮箱',
+      description: 'Đăng ký bằng mã SMS qua Hero-SMS, không cần email',
       identityProvider: 'phone',
       oauthProvider: '',
     })
