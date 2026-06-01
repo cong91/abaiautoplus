@@ -28,7 +28,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const toggleLanguage = useCallback(() => {
-    setLanguageState(current => current === 'zh-CN' ? 'en-US' : 'zh-CN')
+    setLanguageState(current => {
+      if (current === 'vi-VN') return 'zh-CN'
+      if (current === 'zh-CN') return 'en-US'
+      return 'vi-VN'
+    })
   }, [])
 
   useEffect(() => {

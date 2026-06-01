@@ -22,19 +22,19 @@ import {
  * GPT Plus 统一管理页
  * ----------------------------------------------------------------
  * CTF 生成 GPTPlus 和 GoPay 生成 GPTPlus 两条线生成的 Plus 账号都落在
- * accounts 表 platform=chatgpt，这里统一拉取并管理：搜索 / 状态徽章 /
- * 导出 / 刷新配额（plus/free） / 绑定手机号 / Codex OAuth。
+ * accounts 表 platform=chatgpt, 这里统一拉取并管理：搜索 / 状态徽章 /
+ * 导出 / Làm mới hạn mức（plus/free） / Gắn số điện thoại / Codex OAuth。
  *
- * 绑定手机号 + Codex OAuth 复用 CtfGptPlus 页同名功能（``/api/tasks/phone-bind``
- * 与 ``/api/tasks/codex-oauth``），仅拷贝 UI 与状态机，不改后端协议。
+ * Gắn số điện thoại + Codex OAuth 复用 CtfGptPlus 页同名功能（``/api/tasks/phone-bind``
+ * 与 ``/api/tasks/codex-oauth``）, 仅拷贝 UI 与状态机, 不改后端协议。
  */
 
 const BROWSER_MODE_OPTIONS = [
-  { value: "camoufox_headed", label: "Camoufox 前台" },
-  { value: "camoufox_headless", label: "Camoufox 后台" },
-  { value: "bitbrowser_headed", label: "BitBrowser 前台" },
-  { value: "bitbrowser_hidden", label: "BitBrowser 隐藏" },
-  { value: "bitbrowser_headless", label: "BitBrowser 后台" },
+  { value: "camoufox_headed", label: "Camoufox hiển thị" },
+  { value: "camoufox_headless", label: "Camoufox nền" },
+  { value: "bitbrowser_headed", label: "BitBrowser hiển thị" },
+  { value: "bitbrowser_hidden", label: "BitBrowser ẩn" },
+  { value: "bitbrowser_headless", label: "BitBrowser nền" },
 ];
 
 function getAccountOverview(acc: any) {
@@ -120,7 +120,7 @@ export default function PlusManager() {
     "all",
   );
 
-  // 绑定手机号
+  // Gắn số điện thoại
   const [showBind, setShowBind] = useState(false);
   const [phoneLines, setPhoneLines] = useState("");
   const [binding, setBinding] = useState(false);
@@ -150,7 +150,7 @@ export default function PlusManager() {
       const items = (data.items || []).filter(isPlusAccount);
       setAccounts(items);
     } catch (exc: any) {
-      setError(exc?.message || "加载失败");
+      setError(exc?.message || "Tải thất bại");
     } finally {
       setLoading(false);
     }
@@ -243,16 +243,16 @@ export default function PlusManager() {
       });
       const updated = res?.updated ?? res?.success ?? 0;
       const timedOut = res?.timed_out ?? 0;
-      setRefreshMsg(`已刷新 ${updated}/${ids.length}${timedOut ? `，${timedOut} 超时` : ""}`);
+      setRefreshMsg(`Đã làm mới ${updated}/${ids.length}${timedOut ? `, ${timedOut} timeout` : ""}`);
       await load();
     } catch (err: any) {
-      setRefreshMsg(`刷新失败: ${err?.message || err}`);
+      setRefreshMsg(`Làm mới thất bại: ${err?.message || err}`);
     } finally {
       setRefreshing(false);
     }
   };
 
-  // ---- 绑定手机号 -----------------------------------------------------------
+  // ---- Gắn số điện thoại -----------------------------------------------------------
   const startPhoneBind = async () => {
     setError("");
     const ids = [...selectedIds];
@@ -260,11 +260,11 @@ export default function PlusManager() {
       .filter((acc) => !isPhoneBound(acc))
       .map((acc) => Number(acc.id));
     if (!phoneLines.trim()) {
-      setError("请先输入手机号和 SMS API");
+      setError("Vui lòng nhập số điện thoại và SMS API trước");
       return;
     }
     if (ids.length === 0 && fallbackIds.length === 0) {
-      setError("没有可绑定的未绑账户");
+      setError("Không có tài khoản chưa liên kết để gắn số");
       return;
     }
     setBinding(true);
@@ -282,7 +282,7 @@ export default function PlusManager() {
       });
       setBindTaskId(result.task_id || result.id || "");
     } catch (exc: any) {
-      setError(exc?.message || "提交失败");
+      setError(exc?.message || "Gửi thất bại");
       setBinding(false);
     }
   };
@@ -309,7 +309,7 @@ export default function PlusManager() {
     setError("");
     const ids = [...selectedIds];
     if (ids.length === 0) {
-      setError("请选择至少 1 个账户进行 Codex OAuth");
+      setError("Vui lòng chọn ít nhất 1 tài khoản để chạy Codex OAuth");
       return;
     }
     setOauthBusy(true);
@@ -325,7 +325,7 @@ export default function PlusManager() {
       });
       setOauthTaskId(data.task_id || data.id || "");
     } catch (exc: any) {
-      setError(exc?.message || "提交失败");
+      setError(exc?.message || "Gửi thất bại");
     } finally {
       setOauthBusy(false);
     }
@@ -351,7 +351,7 @@ export default function PlusManager() {
       setSelectedIds(new Set());
       await load();
     } catch (exc: any) {
-      setError(exc?.message || "提交失败");
+      setError(exc?.message || "Gửi thất bại");
     } finally {
       setOauthBusy(false);
     }
@@ -372,12 +372,12 @@ export default function PlusManager() {
     return { plus, free, expired, bound };
   }, [accounts]);
 
-  // 留作未来 i18n 字串占位，保证 t 引用不被 tsc strict 标 unused
+  // 留作未来 i18n 字串占位, 保证 t 引用不被 tsc strict 标 unused
   void t;
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
-      {/* 绑定手机号弹窗 */}
+      {/* Phone binding modal */}
       {showBind &&
         createPortal(
           <div
@@ -391,10 +391,10 @@ export default function PlusManager() {
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <div>
                   <h2 className="text-base font-semibold text-[var(--text-primary)]">
-                    绑定手机号
+                    Gắn số điện thoại
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    已选 {selectedIds.size} 个账户；未勾选时按当前列表未绑账户顺序绑定。
+                    Đã chọn {selectedIds.size} tài khoản; nếu chưa chọn, hệ thống sẽ gắn theo thứ tự tài khoản chưa gắn trong danh sách hiện tại.
                   </div>
                 </div>
                 <button
@@ -407,7 +407,7 @@ export default function PlusManager() {
               <div className="space-y-3 px-6 py-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="block text-xs font-medium text-[var(--text-secondary)]">
-                    浏览器模式
+                    Chế độ trình duyệt
                     <select
                       value={browserMode}
                       onChange={(event) => setBrowserMode(event.target.value)}
@@ -422,7 +422,7 @@ export default function PlusManager() {
                     </select>
                   </label>
                   <label className="block text-xs font-medium text-[var(--text-secondary)]">
-                    并发数
+                    Số luồng đồng thời
                     <input
                       type="number"
                       min={1}
@@ -439,7 +439,7 @@ export default function PlusManager() {
                 </div>
                 {browserMode.startsWith("bitbrowser_") && (
                   <div className="rounded border border-[var(--border)] bg-[var(--bg-pane)] px-3 py-2 text-xs text-[var(--text-muted)]">
-                    将自动从“设置 → BitBrowser”的号池取一个最少使用的 profile。
+                    Hệ thống sẽ tự lấy profile ít dùng nhất từ kho “Cài đặt → BitBrowser”.
                   </div>
                 )}
                 <textarea
@@ -452,7 +452,7 @@ export default function PlusManager() {
                   className="control-surface control-surface-compact w-full font-mono text-xs leading-relaxed"
                 />
                 <p className="text-xs text-[var(--text-muted)]">
-                  支持多行；每个手机号最多绑定 3 个 Codex 账户。
+                  Hỗ trợ nhiều dòng; mỗi số điện thoại tối đa gắn 3 tài khoản Codex.
                 </p>
                 {bindTaskId && (
                   <div className="h-[360px] min-h-0 rounded border border-[var(--border)] p-3">
@@ -467,7 +467,7 @@ export default function PlusManager() {
                   onClick={() => setShowBind(false)}
                   disabled={binding}
                 >
-                  关闭
+                  Đóng
                 </Button>
                 <Button size="sm" onClick={startPhoneBind} disabled={binding}>
                   {binding ? (
@@ -475,7 +475,7 @@ export default function PlusManager() {
                   ) : (
                     <Smartphone className="mr-2 h-4 w-4" />
                   )}
-                  开始绑定
+                  Bắt đầu gắn số
                 </Button>
               </div>
             </div>
@@ -483,7 +483,7 @@ export default function PlusManager() {
           document.body,
         )}
 
-      {/* 绑定结果弹窗 */}
+      {/* Phone binding result modal */}
       {bindResult &&
         createPortal(
           <div className="dialog-backdrop" onClick={() => setBindResult(null)}>
@@ -493,7 +493,7 @@ export default function PlusManager() {
             >
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <h2 className="text-base font-semibold text-[var(--text-primary)]">
-                  绑定结果
+                  Kết quả gắn số
                 </h2>
                 <button
                   onClick={() => setBindResult(null)}
@@ -504,17 +504,17 @@ export default function PlusManager() {
               </div>
               <div className="space-y-3 px-6 py-4 text-sm">
                 <div className="text-[var(--text-secondary)]">
-                  成功 {bindResult.success_count || 0}，失败{" "}
+                  Thành công {bindResult.success_count || 0}, Thất bại{" "}
                   {bindResult.failure_count || 0}
                 </div>
                 <div className="overflow-hidden rounded border border-[var(--border)]">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-[var(--bg-pane)] text-[var(--text-muted)]">
                       <tr>
-                        <th className="px-3 py-2">手机号</th>
-                        <th className="px-3 py-2">使用</th>
-                        <th className="px-3 py-2">成功</th>
-                        <th className="px-3 py-2">失败</th>
+                        <th className="px-3 py-2">Số điện thoại</th>
+                        <th className="px-3 py-2">Đã dùng</th>
+                        <th className="px-3 py-2">Thành công</th>
+                        <th className="px-3 py-2">Thất bại</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -535,7 +535,7 @@ export default function PlusManager() {
               </div>
               <div className="flex justify-end border-t border-[var(--border)] px-6 py-3">
                 <Button size="sm" onClick={() => setBindResult(null)}>
-                  关闭
+                  Đóng
                 </Button>
               </div>
             </div>
@@ -543,7 +543,7 @@ export default function PlusManager() {
           document.body,
         )}
 
-      {/* Codex OAuth 任务日志弹窗 */}
+      {/* Codex OAuth task log modal */}
       {oauthTaskId &&
         createPortal(
           <div className="dialog-backdrop" onClick={() => setOauthTaskId("")}>
@@ -557,7 +557,7 @@ export default function PlusManager() {
                     Codex OAuth
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    任务会调用已写好的 OAuth 认证流程，并把日志输出到这里。
+                    Tác vụ sẽ gọi luồng xác thực OAuth có sẵn và xuất log tại đây.
                   </div>
                 </div>
                 <button
@@ -574,7 +574,7 @@ export default function PlusManager() {
               </div>
               <div className="flex justify-end gap-2 border-t border-[var(--border)] px-6 py-3">
                 <Button variant="outline" size="sm" onClick={() => setOauthTaskId("")}>
-                  关闭
+                  Đóng
                 </Button>
               </div>
             </div>
@@ -582,7 +582,7 @@ export default function PlusManager() {
           document.body,
         )}
 
-      {/* Codex OAuth 单账户回调粘贴弹窗 */}
+      {/* Codex OAuth single-account callback paste modal */}
       {oauthModal &&
         createPortal(
           <div
@@ -599,7 +599,7 @@ export default function PlusManager() {
                     Codex OAuth
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    {oauthModal.email || ""} 登录完成后粘贴回调 URL 刷新 token。
+                    {oauthModal.email || ""} Sau khi đăng nhập xong, dán callback URL để làm mới token.
                   </div>
                 </div>
                 <button
@@ -618,14 +618,14 @@ export default function PlusManager() {
                   }
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  打开 OAuth 链接
+                  Mở liên kết OAuth
                 </Button>
                 <textarea
                   value={oauthCallbackUrl}
                   onChange={(event) => setOauthCallbackUrl(event.target.value)}
                   rows={6}
                   spellCheck={false}
-                  placeholder="粘贴之前 OAuth 认证返回的带 access_token / refresh_token 的回调 URL"
+                  placeholder="Dán callback URL có access_token / refresh_token trả về từ lần xác thực OAuth trước"
                   className="control-surface control-surface-compact w-full font-mono text-xs leading-relaxed"
                 />
               </div>
@@ -636,7 +636,7 @@ export default function PlusManager() {
                   onClick={() => setOauthModal(null)}
                   disabled={oauthBusy}
                 >
-                  关闭
+                  Đóng
                 </Button>
                 <Button
                   size="sm"
@@ -648,7 +648,7 @@ export default function PlusManager() {
                   ) : (
                     <ShieldCheck className="mr-2 h-4 w-4" />
                   )}
-                  刷新 token
+                  Làm mới token
                 </Button>
               </div>
             </div>
@@ -656,7 +656,7 @@ export default function PlusManager() {
           document.body,
         )}
 
-      {/* Codex OAuth 启动选项弹窗 */}
+      {/* Codex OAuth launch options modal */}
       {oauthConfirmOpen &&
         createPortal(
           <div
@@ -670,10 +670,10 @@ export default function PlusManager() {
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <div>
                   <h2 className="text-base font-semibold text-[var(--text-primary)]">
-                    Codex OAuth 启动选项
+                    Tùy chọn khởi động Codex OAuth
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    已选 {selectedIds.size} 个账户。配置浏览器模式和并发数后启动批量 OAuth。
+                    Đã chọn {selectedIds.size} tài khoản. Cấu hình chế độ trình duyệt và số luồng rồi khởi động OAuth hàng loạt.
                   </div>
                 </div>
                 <button
@@ -686,7 +686,7 @@ export default function PlusManager() {
               <div className="space-y-4 px-6 py-4">
                 <div>
                   <label className="mb-1 block text-xs text-[var(--text-muted)]">
-                    浏览器模式
+                    Chế độ trình duyệt
                   </label>
                   <select
                     value={browserMode}
@@ -702,7 +702,7 @@ export default function PlusManager() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-[var(--text-muted)]">
-                    并发数
+                    Số luồng đồng thời
                   </label>
                   <input
                     type="number"
@@ -724,7 +724,7 @@ export default function PlusManager() {
                   onClick={() => setOauthConfirmOpen(false)}
                   disabled={oauthBusy}
                 >
-                  关闭
+                  Đóng
                 </Button>
                 <Button
                   size="sm"
@@ -739,7 +739,7 @@ export default function PlusManager() {
                   ) : (
                     <ShieldCheck className="mr-2 h-4 w-4" />
                   )}
-                  启动
+                  Khởi động
                 </Button>
               </div>
             </div>
@@ -747,15 +747,15 @@ export default function PlusManager() {
           document.body,
         )}
 
-      {/* 顶部工具栏 */}
+      {/* Top toolbar */}
       <Card className="shrink-0 bg-[var(--bg-pane)]/40 border border-[var(--border)] shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-5 py-4 border-b border-[var(--border)]/50">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-              GPT Plus 管理
+              Quản lý GPT Plus
             </h1>
             <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-[var(--text-muted)]">共 {accounts.length} 条</span>
+              <span className="text-[var(--text-muted)]">Tổng {accounts.length} dòng</span>
               {counts.plus > 0 && (
                 <span className="rounded-full bg-blue-500/10 px-2 py-0.5 font-medium text-blue-500 ring-1 ring-inset ring-blue-500/20">
                   Plus {counts.plus}
@@ -773,12 +773,12 @@ export default function PlusManager() {
               )}
               {counts.bound > 0 && (
                 <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-500 ring-1 ring-inset ring-emerald-500/20">
-                  已绑 {counts.bound}
+                  Đã gắn {counts.bound}
                 </span>
               )}
               {selectedIds.size > 0 && (
                 <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-medium text-[var(--accent)]">
-                  已选 {selectedIds.size}
+                  Đã chọn {selectedIds.size}
                 </span>
               )}
             </div>
@@ -787,17 +787,17 @@ export default function PlusManager() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="搜索邮箱"
+              placeholder="Tìm email"
               className="control-surface control-surface-compact h-8"
               style={{ width: 240 }}
             />
             <Button size="sm" variant="outline" onClick={() => load()} disabled={loading} className="h-8">
               {loading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
-              刷新
+              Làm mới
             </Button>
             <Button size="sm" variant="outline" onClick={refreshQuota} disabled={refreshing} className="h-8">
               {refreshing ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Gauge className="mr-1.5 h-3.5 w-3.5" />}
-              刷新配额
+              Làm mới hạn mức
             </Button>
             <Button
               size="sm"
@@ -806,7 +806,7 @@ export default function PlusManager() {
               className="h-8"
             >
               <Smartphone className="mr-1.5 h-3.5 w-3.5" />
-              绑定手机号
+              Gắn số điện thoại
             </Button>
             <Button
               size="sm"
@@ -814,7 +814,7 @@ export default function PlusManager() {
               onClick={() => {
                 setError("");
                 if (selectedIds.size === 0) {
-                  setError("请选择至少 1 个账户进行 Codex OAuth");
+                  setError("Vui lòng chọn ít nhất 1 tài khoản để chạy Codex OAuth");
                   return;
                 }
                 setOauthConfirmOpen(true);
@@ -827,12 +827,12 @@ export default function PlusManager() {
             </Button>
             <Button size="sm" onClick={exportCsv} className="h-8">
               <Download className="mr-1.5 h-3.5 w-3.5" />
-              导出 CSV
+              Xuất CSV
             </Button>
           </div>
         </div>
 
-        {/* 过滤条 + 状态条 */}
+        {/* Filter bar and status bar */}
         <div className="flex flex-wrap items-center gap-2 px-5 py-2 text-xs">
           {(["all", "bound", "unbound"] as const).map((value) => (
             <Button
@@ -842,7 +842,7 @@ export default function PlusManager() {
               onClick={() => setBindFilter(value)}
               className="h-7"
             >
-              {value === "all" ? "全部" : value === "bound" ? "已绑" : "未绑"}
+              {value === "all" ? "Tất cả" : value === "bound" ? "Đã gắn" : "Chưa gắn"}
             </Button>
           ))}
           {refreshMsg && (
@@ -864,12 +864,12 @@ export default function PlusManager() {
                 <th className="px-3 py-2 w-8">
                   <input type="checkbox" checked={allSelected} onChange={togglePage} className="h-4 w-4 accent-[var(--accent)]" />
                 </th>
-                <th className="px-3 py-2">邮箱</th>
-                <th className="px-3 py-2">套餐</th>
-                <th className="px-3 py-2">手机</th>
-                <th className="px-3 py-2">来源</th>
-                <th className="px-3 py-2">支付链接</th>
-                <th className="px-3 py-2">创建时间</th>
+                <th className="px-3 py-2">Email</th>
+                <th className="px-3 py-2">Gói</th>
+                <th className="px-3 py-2">Điện thoại</th>
+                <th className="px-3 py-2">Nguồn</th>
+                <th className="px-3 py-2">Liên kết thanh toán</th>
+                <th className="px-3 py-2">Thời gian tạo</th>
               </tr>
             </thead>
             <tbody>
@@ -892,7 +892,7 @@ export default function PlusManager() {
                       <button
                         onClick={() => copy(acc.email)}
                         className="inline-flex items-center gap-1 hover:text-[var(--accent)]"
-                        title="复制邮箱"
+                        title="Sao chép email"
                       >
                         {acc.email}
                         <Copy className="h-3 w-3 opacity-50" />
@@ -904,7 +904,7 @@ export default function PlusManager() {
                     <td className="px-3 py-1.5">
                       {phoneBound ? (
                         <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[11px] text-emerald-300">
-                          已绑
+                          Đã gắn
                         </span>
                       ) : (
                         <span className="text-[var(--text-muted)]">-</span>
@@ -916,7 +916,7 @@ export default function PlusManager() {
                     <td className="px-3 py-1.5 text-[var(--text-muted)]">
                       {cashier ? (
                         <a href={cashier} target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">
-                          链接
+                          Liên kết
                         </a>
                       ) : (
                         "-"
@@ -929,7 +929,7 @@ export default function PlusManager() {
               {filteredAccounts.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-3 py-8 text-center text-[var(--text-muted)]">
-                    {loading ? "加载中…" : "暂无 Plus 账号"}
+                    {loading ? "Đang tải…" : "Chưa có tài khoản Plus"}
                   </td>
                 </tr>
               )}

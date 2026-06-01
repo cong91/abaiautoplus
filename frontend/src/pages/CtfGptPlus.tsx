@@ -57,11 +57,11 @@ const DEFAULT_PAYMENT = {
 };
 
 const BROWSER_MODE_OPTIONS = [
-  { value: "camoufox_headed", label: "Camoufox 前台" },
-  { value: "camoufox_headless", label: "Camoufox 后台" },
-  { value: "bitbrowser_headed", label: "BitBrowser 前台" },
-  { value: "bitbrowser_hidden", label: "BitBrowser 隐藏" },
-  { value: "bitbrowser_headless", label: "BitBrowser 后台" },
+  { value: "camoufox_headed", label: "Camoufox hiển thị" },
+  { value: "camoufox_headless", label: "Camoufox nền" },
+  { value: "bitbrowser_headed", label: "BitBrowser hiển thị" },
+  { value: "bitbrowser_hidden", label: "BitBrowser ẩn" },
+  { value: "bitbrowser_headless", label: "BitBrowser nền" },
 ];
 
 const EMPTY_CONFIG_OPTIONS = {
@@ -202,7 +202,7 @@ function GeneratePlusModal({
   platformMeta: any;
   onClose: () => void;
   onDone: () => void;
-  // 传入时表示"复用已选账号生成支付链接"模式：跳过注册，直接调
+  // 传入时表示"复用已选账号生成Liên kết thanh toán"模式：跳过注册，直接调
   // ``POST /api/actions/chatgpt/{id}/payment_link`` action 让后端用既有
   // access_token 走 cashier API 拿 url 并自动 PayPal checkout。
   reuseAccountId?: number | null;
@@ -412,7 +412,7 @@ function GeneratePlusModal({
           proxy_region: payment.country,
           address_region: payment.address_region || "US",
           sms_pool: payment.sms_pool,
-          // 强制重新生成（用户每次点都期望换一条新链接），
+          // 强制重新生成（用户每次点都期望换一条新Liên kết），
           // 避免后端因 cashier_url 已在 extra 里就直接跳过重新拉取。
           regenerate: "true",
         };
@@ -435,7 +435,7 @@ function GeneratePlusModal({
       return;
     }
     // 强校验 SMS 号码池：每个**并发**线程独占一条号——所以池大小要
-    // ≥ concurrency（**不是** count）。注册数量可以超过并发数，每批跑完
+    // ≥ concurrency（**不是** count）。注册数量可以超过Số luồng đồng thời，每批跑完
     // 槽位释放给下一批复用。校验逻辑跟后端 ``_execute_register_task`` 保持一致。
     const validSmsLines = String(payment.sms_pool || "")
       .split(/\r?\n/)
@@ -562,22 +562,22 @@ function GeneratePlusModal({
           <div>
             <h2 className="text-base font-semibold text-[var(--text-primary)]">
               {reuseAccountId
-                ? "复用账号生成 Plus 链接"
-                : "生成 GPT Plus 账户"}
+                ? "Dùng lại tài khoản để tạo liên kết Plus"
+                : "Tạo tài khoản GPT Plus"}
             </h2>
             <div className="mt-1 text-xs text-[var(--text-muted)]">
               {reuseAccountId ? (
                 <>
-                  跳过注册，直接用已选账号
+                  Bỏ qua đăng ký, dùng trực tiếp tài khoản đã chọn
                   {reuseAccountEmail ? (
                     <span className="ml-1 font-mono text-[var(--text-primary)]">
                       {reuseAccountEmail}
                     </span>
                   ) : null}
-                  {" 生成支付链接并自动 PayPal checkout。"}
+                  {" để tạo liên kết thanh toán và tự động checkout PayPal."}
                 </>
               ) : (
-                "自动注册 ChatGPT 账户，成功后生成并执行 Plus 测试支付链路。"
+                "Tự động đăng ký tài khoản ChatGPT; sau khi thành công sẽ tạo và chạy luồng thanh toán thử Plus."
               )}
             </div>
           </div>
@@ -672,7 +672,7 @@ function GeneratePlusModal({
                               disabled={option.disabled}
                             >
                               {option.label}
-                              {option.disabled ? " (不可用)" : ""}
+                              {option.disabled ? " (không khả dụng)" : ""}
                             </option>
                           ))}
                         </select>
@@ -865,9 +865,9 @@ function GeneratePlusModal({
                   </div>
                 </section>
 
-                {/* SMS 号码池：PayPal SignUp 触发 PHONE_CONFIRMATION_REQUIRED 时
-                    需要从这里挑一对 (phone, relay_url) 走 OTP 子链。每行一条，
-                    格式 `+phone----relay_url`，留空则不启用 OTP 子链。 */}
+                {/* SMS pool: when PayPal signup requires phone confirmation,
+                    each line provides one +phone----relay_url pair for the OTP sub-flow.
+                    Leave empty to disable OTP. */}
                 <section className="space-y-1">
                   <label className="block text-xs text-[var(--text-muted)]">
                     {t("ctfGptPlus.smsPoolLabel")}
@@ -916,7 +916,7 @@ function GeneratePlusModal({
                     </>
                   ) : (
                     <div>
-                      复用账号:{" "}
+                      Tài khoản dùng lại:{" "}
                       <span className="font-mono text-[var(--text-primary)]">
                         {reuseAccountEmail || `#${reuseAccountId}`}
                       </span>
@@ -955,7 +955,7 @@ function GeneratePlusModal({
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />
                       {reuseAccountId
-                        ? "生成 Plus 链接并 checkout"
+                        ? "Tạo liên kết Plus và checkout"
                         : t("ctfGptPlus.start")}
                     </>
                   )}
@@ -1022,7 +1022,7 @@ export default function CtfGptPlus() {
   const [oauthCallbackUrl, setOauthCallbackUrl] = useState("");
   const [oauthBusy, setOauthBusy] = useState(false);
   const [quotaBusy, setQuotaBusy] = useState(false);
-  // 点击顶部"Codex OAuth"按钮先弹这个确认对话框选浏览器模式 / 并发数，
+  // 点击顶部"Codex OAuth"按钮先弹这个确认对话框选Chế độ trình duyệt / Số luồng đồng thời，
   // 之前是直接用顶部工具栏的两个控件——按用户诉求把它们移进来。
   const [oauthConfirmOpen, setOauthConfirmOpen] = useState(false);
 
@@ -1048,7 +1048,7 @@ export default function CtfGptPlus() {
     try {
       // 列表加载所有 chatgpt 账号——不再按 ``status=subscribed`` 过滤、
       // 也不再客户端 ``isPlusAccount`` 截留。诉求是"复用任何已注册账户去
-      // 生成 Plus 链接"，未订阅账号也要可见。``page_size=1000`` 足够覆盖
+      // 生成 Plus Liên kết"，未订阅账号也要可见。``page_size=1000`` 足够覆盖
       // 一般场景，超出时下面 setTotal 仍按返回条数走，用户能感知截断。
       const params = new URLSearchParams({
         platform: "chatgpt",
@@ -1127,11 +1127,11 @@ export default function CtfGptPlus() {
       .filter((acc) => !isPhoneBound(acc))
       .map((acc) => Number(acc.id));
     if (!phoneLines.trim()) {
-      setError("请先输入手机号和 SMS API");
+      setError("Vui lòng nhập số điện thoại và SMS API trước");
       return;
     }
     if (ids.length === 0 && fallbackIds.length === 0) {
-      setError("没有可绑定的未绑账户");
+      setError("Không có tài khoản chưa liên kết để gắn số");
       return;
     }
     setBinding(true);
@@ -1175,7 +1175,7 @@ export default function CtfGptPlus() {
     setError("");
     const ids = [...selectedIds];
     if (ids.length === 0) {
-      setError("请先勾选要导出的账户");
+      setError("Vui lòng chọn tài khoản cần xuất trước");
       return;
     }
     const pathByFormat: Record<string, string> = {
@@ -1217,15 +1217,15 @@ export default function CtfGptPlus() {
   };
 
 
-  // "刷新配额"——只刷新**当前勾选的账户**（用户诉求："勾了哪些跑哪些"）。
+  // "Làm mới hạn mức"——只刷新**当前勾选的账户**（用户诉求："勾了哪些跑哪些"）。
   // 后端 ``POST /api/accounts/refresh-plan?platform=chatgpt`` body 里带
   // ``{ids: [...]}``。一个都没勾选时给个提示，不再默认全跑（避免 100+ 号
-  // 一次刷干死 ChatGPT 限流和后端超时）。
+  // 一次刷干死 ChatGPT 限流和后端timeout）。
   const refreshQuota = async () => {
     setError("");
     const ids = [...selectedIds];
     if (ids.length === 0) {
-      setError("请先勾选至少 1 个账户再刷新配额");
+      setError("Vui lòng chọn ít nhất 1 tài khoản trước khi làm mới hạn mức");
       return;
     }
     setQuotaBusy(true);
@@ -1242,12 +1242,12 @@ export default function CtfGptPlus() {
       const timedOut = Number(result?.timed_out || 0);
       // eslint-disable-next-line no-console
       console.info(
-        `[refreshQuota] ${updated}/${total} 已刷新, ${timedOut} 超时`,
+        `[refreshQuota] ${updated}/${total} đã làm mới, ${timedOut} timeout`,
         result,
       );
       if (timedOut > 0) {
         setError(
-          `本批 ${timedOut} 个账户超时未刷新（共 ${total} 个），请稍后再点一次"刷新配额"`,
+          `Đợt này có ${timedOut} tài khoản timeout chưa làm mới (tổng ${total}), vui lòng bấm “Làm mới hạn mức” lại sau`,
         );
       }
       await load();
@@ -1262,7 +1262,7 @@ export default function CtfGptPlus() {
     setError("");
     const ids = [...selectedIds];
     if (ids.length === 0) {
-      setError("请选择至少 1 个账户进行 Codex OAuth");
+      setError("Vui lòng chọn ít nhất 1 tài khoản để chạy Codex OAuth");
       return;
     }
     setOauthBusy(true);
@@ -1348,10 +1348,10 @@ export default function CtfGptPlus() {
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <div>
                   <h2 className="text-base font-semibold text-[var(--text-primary)]">
-                    绑定手机号
+                    Gắn số điện thoại
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    已选 {selectedCount} 个账户；未勾选时按当前列表未绑账户顺序绑定。
+                    Đã chọn {selectedCount} tài khoản; nếu chưa chọn, hệ thống sẽ gắn theo thứ tự tài khoản chưa gắn trong danh sách hiện tại.
                   </div>
                 </div>
                 <button
@@ -1364,7 +1364,7 @@ export default function CtfGptPlus() {
               <div className="space-y-3 px-6 py-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="block text-xs font-medium text-[var(--text-secondary)]">
-                    浏览器模式
+                    Chế độ trình duyệt
                     <select
                       value={browserMode}
                       onChange={(event) => setBrowserMode(event.target.value)}
@@ -1380,11 +1380,11 @@ export default function CtfGptPlus() {
                   </label>
                   {browserMode.startsWith("bitbrowser_") && (
                     <div className="rounded border border-[var(--border)] bg-[var(--bg-pane)] px-3 py-2 text-xs text-[var(--text-muted)]">
-                      将自动从“设置 → BitBrowser”的号池取一个最少使用的 profile。
+                      Hệ thống sẽ tự lấy profile ít dùng nhất từ kho “Cài đặt → BitBrowser”.
                     </div>
                   )}
                   <label className="block text-xs font-medium text-[var(--text-secondary)]">
-                    并发数
+                    Số luồng đồng thời
                     <input
                       type="number"
                       min={1}
@@ -1407,7 +1407,7 @@ export default function CtfGptPlus() {
                   className="control-surface control-surface-compact w-full font-mono text-xs leading-relaxed"
                 />
                 <p className="text-xs text-[var(--text-muted)]">
-                  支持多行；每个手机号最多绑定 3 个 Codex 账户。
+                  Hỗ trợ nhiều dòng; mỗi số điện thoại tối đa gắn 3 tài khoản Codex.
                 </p>
                 {bindTaskId && (
                   <div className="h-[360px] min-h-0 rounded border border-[var(--border)] p-3">
@@ -1430,7 +1430,7 @@ export default function CtfGptPlus() {
                   ) : (
                     <Smartphone className="mr-2 h-4 w-4" />
                   )}
-                  开始绑定
+                  Bắt đầu gắn số
                 </Button>
               </div>
             </div>
@@ -1446,7 +1446,7 @@ export default function CtfGptPlus() {
             >
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <h2 className="text-base font-semibold text-[var(--text-primary)]">
-                  绑定结果
+                  Kết quả gắn số
                 </h2>
                 <button
                   onClick={() => setBindResult(null)}
@@ -1457,17 +1457,17 @@ export default function CtfGptPlus() {
               </div>
               <div className="space-y-3 px-6 py-4 text-sm">
                 <div className="text-[var(--text-secondary)]">
-                  成功 {bindResult.success_count || 0}，失败{" "}
+                  Thành công {bindResult.success_count || 0}，Thất bại{" "}
                   {bindResult.failure_count || 0}
                 </div>
                 <div className="overflow-hidden rounded border border-[var(--border)]">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-[var(--bg-pane)] text-[var(--text-muted)]">
                       <tr>
-                        <th className="px-3 py-2">手机号</th>
-                        <th className="px-3 py-2">使用</th>
-                        <th className="px-3 py-2">成功</th>
-                        <th className="px-3 py-2">失败</th>
+                        <th className="px-3 py-2">Số điện thoại</th>
+                        <th className="px-3 py-2">Đã dùng</th>
+                        <th className="px-3 py-2">Thành công</th>
+                        <th className="px-3 py-2">Thất bại</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1508,7 +1508,7 @@ export default function CtfGptPlus() {
                     Codex OAuth
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    任务会调用已写好的 OAuth 认证流程，并把日志输出到这里。
+                    Tác vụ sẽ gọi luồng xác thực OAuth có sẵn và xuất log tại đây.
                   </div>
                 </div>
                 <button
@@ -1545,7 +1545,7 @@ export default function CtfGptPlus() {
                     Codex OAuth
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    {oauthModal.email || ""} 登录完成后粘贴回调 URL 刷新 token。
+                    {oauthModal.email || ""} Sau khi đăng nhập xong, dán callback URL để làm mới token.
                   </div>
                 </div>
                 <button
@@ -1562,14 +1562,14 @@ export default function CtfGptPlus() {
                   onClick={() => window.open(oauthModal.auth_url, "_blank", "noopener,noreferrer")}
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  打开 OAuth 链接
+                  Mở liên kết OAuth
                 </Button>
                 <textarea
                   value={oauthCallbackUrl}
                   onChange={(event) => setOauthCallbackUrl(event.target.value)}
                   rows={6}
                   spellCheck={false}
-                  placeholder="粘贴之前 OAuth 认证返回的带 access_token / refresh_token 的回调 URL"
+                  placeholder="Dán callback URL có access_token / refresh_token trả về từ lần xác thực OAuth trước"
                   className="control-surface control-surface-compact w-full font-mono text-xs leading-relaxed"
                 />
               </div>
@@ -1592,7 +1592,7 @@ export default function CtfGptPlus() {
                   ) : (
                     <ShieldCheck className="mr-2 h-4 w-4" />
                   )}
-                  刷新 token
+                  Làm mới token
                 </Button>
               </div>
             </div>
@@ -1600,7 +1600,7 @@ export default function CtfGptPlus() {
           document.body,
         )}
 
-      {/* Codex OAuth 启动确认弹窗：选浏览器模式 + 并发数后才正式启动任务 */}
+      {/* Codex OAuth launch confirmation: choose browser mode and concurrency before starting the task. */}
       {oauthConfirmOpen &&
         createPortal(
           <div
@@ -1614,10 +1614,10 @@ export default function CtfGptPlus() {
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <div>
                   <h2 className="text-base font-semibold text-[var(--text-primary)]">
-                    Codex OAuth 启动选项
+                    Tùy chọn khởi động Codex OAuth
                   </h2>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    已选 {selectedIds.size} 个账户。配置浏览器模式和并发数后启动批量 OAuth。
+                    Đã chọn {selectedIds.size} tài khoản. Cấu hình chế độ trình duyệt và số luồng rồi khởi động OAuth hàng loạt.
                   </div>
                 </div>
                 <button
@@ -1630,7 +1630,7 @@ export default function CtfGptPlus() {
               <div className="space-y-4 px-6 py-4">
                 <div>
                   <label className="mb-1 block text-xs text-[var(--text-muted)]">
-                    浏览器模式
+                    Chế độ trình duyệt
                   </label>
                   <select
                     value={browserMode}
@@ -1646,7 +1646,7 @@ export default function CtfGptPlus() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-[var(--text-muted)]">
-                    并发数
+                    Số luồng đồng thời
                   </label>
                   <input
                     type="number"
@@ -1683,7 +1683,7 @@ export default function CtfGptPlus() {
                   ) : (
                     <ShieldCheck className="mr-2 h-4 w-4" />
                   )}
-                  启动
+                  Khởi động
                 </Button>
               </div>
             </div>
@@ -1697,7 +1697,7 @@ export default function CtfGptPlus() {
             {t("ctfGptPlus.title")}
           </h1>
           <div className="mt-1 text-sm text-[var(--text-muted)]">
-            已完成 CTF Plus 链路的 ChatGPT 账户会保存在这里。
+            Các tài khoản ChatGPT đã hoàn tất luồng CTF Plus sẽ được lưu tại đây.
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -1712,22 +1712,22 @@ export default function CtfGptPlus() {
             size="sm"
             onClick={refreshQuota}
             disabled={quotaBusy || loading || selectedCount === 0}
-            title="刷新已勾选账户的订阅状态（plus / free / expired）；未勾选时禁用"
+            title="Làm mới trạng thái đăng ký của tài khoản đã chọn (plus / free / expired); không chọn thì nút bị tắt"
           >
             {quotaBusy ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Gauge className="mr-2 h-4 w-4" />
             )}
-            刷新配额
+            Làm mới hạn mức
           </Button>
           <Button size="sm" onClick={() => setShowGenerate(true)}>
             <Sparkles className="mr-2 h-4 w-4" />
-            {selectedIds.size === 1 ? "用已选账号生成 Plus 链接" : "生成 GPT Plus"}
+            {selectedIds.size === 1 ? "Dùng tài khoản đã chọn để tạo liên kết Plus" : "Tạo GPT Plus"}
           </Button>
           <Button size="sm" variant="outline" onClick={() => setShowBind(true)}>
             <Smartphone className="mr-2 h-4 w-4" />
-            绑定手机号
+            Gắn số điện thoại
           </Button>
           <Button
             size="sm"
@@ -1735,7 +1735,7 @@ export default function CtfGptPlus() {
             onClick={() => {
               setError("");
               if (selectedIds.size === 0) {
-                setError("请选择至少 1 个账户进行 Codex OAuth");
+                setError("Vui lòng chọn ít nhất 1 tài khoản để chạy Codex OAuth");
                 return;
               }
               setOauthConfirmOpen(true);
@@ -1750,10 +1750,10 @@ export default function CtfGptPlus() {
 
       <div className="grid gap-3 md:grid-cols-4">
         {[
-          ["Plus 账户", String(accounts.length), CheckCircle],
-          ["订阅状态", String(subscribedCount), Sparkles],
-          ["支付链接", String(cashierCount), CreditCard],
-          ["已绑手机号", String(boundCount), Smartphone],
+          ["Tài khoản Plus", String(accounts.length), CheckCircle],
+          ["Trạng thái đăng ký", String(subscribedCount), Sparkles],
+          ["Liên kết thanh toán", String(cashierCount), CreditCard],
+          ["Đã gắn số điện thoại", String(boundCount), Smartphone],
         ].map(([label, value, Icon]: any) => (
           <Card key={label} className="px-4 py-3">
             <div className="flex items-center justify-between">
@@ -1774,7 +1774,7 @@ export default function CtfGptPlus() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="搜索邮箱"
+            placeholder="Tìm email"
             className="control-surface control-surface-compact w-full lg:w-64"
             style={{ width: "375px" }}
           />
@@ -1786,7 +1786,7 @@ export default function CtfGptPlus() {
                 variant={exportFilter === value ? "default" : "outline"}
                 onClick={() => setExportFilter(value)}
               >
-                {value === "unexported" ? "未导出" : "已导出"}
+                {value === "unexported" ? "Chưa xuất" : "Đã xuất"}
               </Button>
             ))}
             {(["all", "bound", "unbound"] as const).map((value) => (
@@ -1796,7 +1796,7 @@ export default function CtfGptPlus() {
                 variant={bindFilter === value ? "default" : "outline"}
                 onClick={() => setBindFilter(value)}
               >
-                {value === "all" ? "全部" : value === "bound" ? "已绑" : "未绑"}
+                {value === "all" ? "Tất cả" : value === "bound" ? "Đã gắn" : "Chưa gắn"}
               </Button>
             ))}
             <select
@@ -1805,7 +1805,7 @@ export default function CtfGptPlus() {
               className="control-surface control-surface-compact h-8"
               style={{ width: "145px" }}
             >
-              <option value="email-api">Email+邮件api</option>
+              <option value="email-api">Email + API email</option>
               <option value="cpa">cpa</option>
               <option value="sub2api">sub2api</option>
               <option value="cockpit">cockpit</option>
@@ -1817,7 +1817,7 @@ export default function CtfGptPlus() {
               disabled={selectedCount === 0}
             >
               <Download className="mr-2 h-4 w-4" />
-              导出
+              Xuất
             </Button>
           </div>
         </div>
@@ -1845,7 +1845,7 @@ export default function CtfGptPlus() {
                 <th className="px-3 py-2">Plan</th>
                 <th className="px-3 py-2">Cashier</th>
                 <th className="px-3 py-2">Created</th>
-                <th className="px-3 py-2">操作</th>
+                <th className="px-3 py-2">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -1865,7 +1865,7 @@ export default function CtfGptPlus() {
                     colSpan={7}
                     className="px-4 py-12 text-center text-sm text-[var(--text-muted)]"
                   >
-                    暂无 Plus 账户
+                    Chưa có tài khoản Plus
                   </td>
                 </tr>
               ) : (
@@ -1895,7 +1895,7 @@ export default function CtfGptPlus() {
                           </span>
                           <button
                             onClick={() => copyText(emailApiLine(acc.email))}
-                            title="复制 Email+邮件API"
+                            title="Sao chép Email + API email"
                             className="opacity-0 transition-opacity group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                           >
                             <Copy className="h-3 w-3" />
@@ -1918,14 +1918,14 @@ export default function CtfGptPlus() {
                         {phoneBound ? (
                           <div className="mt-1.5">
                             <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[11px] text-emerald-300">
-                              已绑
+                              Đã gắn
                             </span>
                           </div>
                         ) : null}
                         {exported ? (
                           <div className="mt-1.5">
                             <span className="rounded border border-sky-500/30 bg-sky-500/10 px-1.5 py-0.5 text-[11px] text-sky-300">
-                              已导出
+                              Đã xuất
                             </span>
                           </div>
                         ) : null}
@@ -1990,7 +1990,7 @@ export default function CtfGptPlus() {
                             <button
                               onClick={() => copyText(cashierUrl)}
                               className="rounded p-0.5 text-[var(--text-muted)] hover:bg-[var(--bg-pane)] hover:text-[var(--text-primary)]"
-                              title="复制链接"
+                              title="Sao chép liên kết"
                             >
                               <Copy className="h-3 w-3" />
                             </button>
@@ -1999,7 +1999,7 @@ export default function CtfGptPlus() {
                               target="_blank"
                               rel="noreferrer"
                               className="rounded p-0.5 text-[var(--text-muted)] hover:bg-[var(--bg-pane)] hover:text-[var(--text-primary)]"
-                              title="打开链接"
+                              title="Mở liên kết"
                             >
                               <ExternalLink className="h-3 w-3" />
                             </a>
@@ -2027,7 +2027,7 @@ export default function CtfGptPlus() {
                           variant="outline"
                           onClick={() => moveExportStatus(Number(acc.id), !exported)}
                         >
-                          {exported ? "移出已导出" : "移入已导出"}
+                          {exported ? "Bỏ khỏi đã xuất" : "Đánh dấu đã xuất"}
                         </Button>
                       </td>
                     </tr>
